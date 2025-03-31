@@ -1,39 +1,43 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import userRoutes from './routes/user';
+import database from './config/database';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sendAlertEmail } from './utils/nodemailer';
 
+// Setting up port number
+const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+
+// Loading environment variables from .env file
 dotenv.config();
 
+// Connecting to database
+database.connect();
+
 const app = express();
-const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// Middlewares
 app.use(express.json());
+app.use(cookieParser());
+app.use(
+    cors({
+        origin: "*",
+        credentials: true,
+    })
+);
 
-// Routes
-app.post('/api/alerts/notify', async (req, res) => {
-  try {
-    const { email, alert } = req.body;
-    const result = await sendAlertEmail(email, alert);
-    
-    if (result.success) {
-      res.json({ success: true, messageId: result.messageId });
-    } else {
-      res.status(500).json({ success: false, error: result.error });
-    }
-  } catch (error) {
-    console.error('Error processing alert notification:', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
+// Setting up routes
+app.use("/", userRoutes);
+
+// Testing the server
+app.get("/", (_req: Request, res: Response) => {
+    return res.json({
+        success: true,
+        message: "Your server is up and running ...",
+    });
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Listening to the server
+app.listen(PORT, () => {
+    console.log(`App is listening at ${PORT}`);
 }); 
