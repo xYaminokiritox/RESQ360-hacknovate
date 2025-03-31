@@ -1,31 +1,45 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "scripts": {
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.21.2",
-    "nodemailer": "^6.9.1"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/dotenv": "^8.2.0",
-    "@types/express": "^5.0.1",
-    "@types/node": "^18.15.11",
-    "@types/nodemailer": "^6.4.7",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
-  }
+	"name": "RESQ360-backend",
+	"version": "1.0.0",
+	"description": "RESQ360-backend",
+	"main": "dist/index.js",
+	"scripts": {
+		"start": "node dist/index.js",
+		"dev": "nodemon",
+		"build": "tsc",
+		"watch": "tsc -w"
+	},
+	"keywords": [
+		"RESQ360-backend"
+	],
+	"author": "Arjun ",
+	"license": "ISC",
+	"dependencies": {
+		"bcrypt": "^5.1.0",
+		"bcryptjs": "^2.4.3",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"crypto-random-string": "^5.0.0",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"jsonwebtoken": "^9.0.0",
+		"mongoose": "^7.0.3",
+		"node-schedule": "^2.1.1",
+		"nodemailer": "^6.9.1",
+		"nodemon": "^2.0.22",
+		"otp-generator": "^4.0.1"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
+		"@types/bcryptjs": "^2.4.2",
+		"@types/cookie-parser": "^1.4.3",
+		"@types/cors": "^2.8.13",
+		"@types/express": "^4.17.21",
+		"@types/jsonwebtoken": "^9.0.9",
+		"@types/node": "^18.15.11",
+		"@types/nodemailer": "^6.4.17",
+		"@types/otp-generator": "^4.0.2",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.0.4"
+	}
 }
