@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { 
+ useAuth
   ExclamationTriangleIcon,
   MapPinIcon,
   FireIcon,
@@ -43,6 +44,7 @@ const alertTypes = [
 ];
 
 export const CreateAlert: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState<AlertForm>({
@@ -136,7 +138,7 @@ export const CreateAlert: React.FC = () => {
         status: 'active',
         timestamp: new Date(),
         createdAt: new Date(),
-        reportedBy: 'user', // Add a default value or get from authentication
+        reportedBy: user ? user.uid : 'anonymous', // Use user UID if logged in, otherwise 'anonymous'
         responders: []
       };
 

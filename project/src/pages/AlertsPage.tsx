@@ -23,17 +23,34 @@ export const AlertsPage: React.FC = () => {
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Memoize the initial query
-  const initialQuery = useMemo(() => {
+  // Memoize the base query based on filters
+  const baseQuery = useMemo(() => {
     const alertsRef = collection(db, 'alerts');
-    return query(
-      alertsRef,
-      orderBy('timestamp', 'desc'),
-      limit(PAGE_SIZE)
-    );
-  }, []);
+    let q = query(alertsRef, orderBy('timestamp', 'desc'));
 
-  // Load initial data
+    if (selectedType === 'ghaziabad') {
+      // Note: Firestore querying by substring like 'includes' is not directly supported.
+      // A more robust solution for location-based filtering would involve
+      // geohashing or a dedicated geospatial database.
+      // For simplicity and based on the original filtering logic, this client-side
+      // filter for 'ghaziabad' address will remain in the filteredAlerts memo,
+      // but the base query will fetch all alerts to allow for this client-side filter.
+      // If true server-side filtering for 'ghaziabad' is needed, a different
+      // data structure or approach is required.
+    } else if (selectedType !== 'all') {
+      q = query(q, where('type', '==', selectedType));
+    }
+
+    if (selectedSeverity !== 'all') {
+      q = query(q, where('severity', '==', selectedSeverity));
+    }
+
+ return q;
+  }, [selectedType, selectedSeverity]);
+
+  // Define the initial query including the limit
+  const initialQuery = useMemo(() => query(baseQuery, limit(PAGE_SIZE)), [baseQuery]);
+
   useEffect(() => {
     setIsLoading(true);
     setError(null);
@@ -96,12 +113,13 @@ export const AlertsPage: React.FC = () => {
           }
         },
         (err) => {
-          console.error("Error fetching alerts:", err);
-          setError("Failed to fetch alerts");
+          console.error("Firestore listener error fetching alerts:", err);
+          setError(`Failed to fetch alerts: ${err.message || 'Unknown error'}. Please check your internet connection and permissions.`);
           setIsLoading(false);
         }
       );
 
+      // Initial load with limit
       return () => unsubscribe();
     } catch (err) {
       console.error("Error setting up alerts listener:", err);
@@ -118,12 +136,10 @@ export const AlertsPage: React.FC = () => {
       setIsLoading(true);
       const alertsRef = collection(db, 'alerts');
       const nextQuery = query(
-        alertsRef,
-        orderBy('timestamp', 'desc'),
+ baseQuery, // Start with the base query (includes filters)
         startAfter(lastVisible),
         limit(PAGE_SIZE)
       );
-
       const snapshot = await getDocs(nextQuery);
       const newAlerts = snapshot.docs.map(doc => {
         const data = doc.data();
@@ -168,7 +184,7 @@ export const AlertsPage: React.FC = () => {
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length === PAGE_SIZE);
     } catch (error) {
-      console.error('Error loading more alerts:', error);
+      console.error('Error loading more alerts from Firestore:', error);
       setError('Failed to load more alerts');
     } finally {
       setIsLoading(false);
@@ -234,7 +250,7 @@ export const AlertsPage: React.FC = () => {
     setError(null);
     setIsLoading(true);
     setAlerts([]);
-    // Force reload by setting a new "key" for the component 
+    // Force reload by setting a new "key" for the component
     // by re-fetching the initial data
     const fetchData = async () => {
       try {
@@ -286,7 +302,7 @@ export const AlertsPage: React.FC = () => {
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         setHasMore(snapshot.docs.length === PAGE_SIZE);
       } catch (err) {
-        console.error("Error reloading alerts data:", err);
+        console.error("Error reloading alerts data from Firestore:", err);
         setError("Failed to reload alerts data. Please try again.");
       } finally {
         setIsLoading(false);
